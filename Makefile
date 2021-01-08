@@ -14,12 +14,13 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 include $(RACK_DIR)/arch.mk
 
 DUKTAPE ?= 0
-QUICKJS ?= 1
-LUAJIT ?= 1
+QUICKJS ?= 0
+LUAJIT ?= 0
 PYTHON ?= 0
+CSOUND ?= 1
 SUPERCOLLIDER ?= 0
-VULT ?= 1
-LIBPD ?= 1
+VULT ?= 0
+LIBPD ?= 0
 
 # Vult depends on both LuaJIT and QuickJS
 ifeq ($(VULT), 1)
@@ -52,7 +53,6 @@ $(duktape):
 	$(SHA256) duktape-2.4.0.tar.xz 86a89307d1633b5cedb2c6e56dc86e92679fc34b05be551722d8cc69ab0771fc
 	cd dep && $(UNTAR) ../duktape-2.4.0.tar.xz
 endif
-
 
 # QuickJS
 ifeq ($(QUICKJS), 1)
@@ -246,6 +246,14 @@ else
 	cd dep/libpd && $(MAKE) MULTI=true BUILD_LIBPD_STATIC=true ADDITIONAL_CFLAGS='-DPD_LONGINTTYPE="long long"'
 endif
 	cd dep/libpd && $(MAKE) install prefix="$(DEP_PATH)"
+endif
+
+# Csound
+ifeq ($(CSOUND), 1)
+SOURCES += src/CsoundEngine.cpp
+CXXFLAGS += -I /Library/Frameworks/CsoundLib64.framework/Versions/6.0/Headers 
+LDFLAGS +=   -F /Library/Frameworks/ -framework CsoundLib64 -rpath
+# FLAGS += -lsndfile 
 endif
 
 
