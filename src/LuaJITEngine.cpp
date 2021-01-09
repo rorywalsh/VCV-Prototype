@@ -68,7 +68,7 @@ struct LuaJITEngine : ScriptEngine {
 		for (const luaL_Reg* lib = lj_lib_load; lib->func; lib++) {
 			lua_pushcfunction(L, lib->func);
 			lua_pushstring(L, lib->name);
-			lua_call(L, 1, 0);
+			lua_call(L, 1, 0)
 		}
 
 		// Set user pointer

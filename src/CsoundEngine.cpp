@@ -15,6 +15,7 @@ struct CsoundEngine : ScriptEngine {
     std::vector<std::string> knobs;
     std::vector<std::string> switches;
     std::vector<std::string> lights;
+    std::vector<std::string> switchLights;
 
     int frames = 0;
 
@@ -76,9 +77,16 @@ struct CsoundEngine : ScriptEngine {
 		{
             std::string inputChannel = std::string("in")+std::to_string(i+1);
             std::string outputChannel = std::string("out")+std::to_string(i+1);
-            knobs.push_back(std::string("knob")+std::to_string(i+1));
-            switches.push_back(std::string("switch")+std::to_string(i+1));
-            lights.push_back(std::string("light")+std::to_string(i+1));
+            knobs.push_back(std::string("k")+std::to_string(i+1));
+            switches.push_back(std::string("s")+std::to_string(i+1));
+        
+            lights.push_back(std::string("l")+std::to_string(i+1)+std::string("r"));
+            lights.push_back(std::string("l")+std::to_string(i+1)+std::string("g"));
+            lights.push_back(std::string("l")+std::to_string(i+1)+std::string("b"));
+
+            switchLights.push_back(std::string("sl")+std::to_string(i+1)+std::string("r"));
+            switchLights.push_back(std::string("sl")+std::to_string(i+1)+std::string("g"));
+            switchLights.push_back(std::string("sl")+std::to_string(i+1)+std::string("b"));
 
 			audioOutputChannels[i] = new MYFLT[ksmps];
 			csoundGetChannelPtr(csound->GetCsound(), &audioOutputChannels[i], outputChannel.c_str(),
@@ -102,12 +110,30 @@ struct CsoundEngine : ScriptEngine {
 		return 0;
 	}
 
+    void updateLights(ProcessBlock* block)
+    {
+        for( int i = 0 ; i < (int)lights.size()/3 ; i++)
+        {
+            block->lights[i][0] = csound->GetControlChannel(lights[i*3].c_str());
+            block->lights[i][1] = csound->GetControlChannel(lights[i*3+1].c_str());
+            block->lights[i][2] = csound->GetControlChannel(lights[i*3+2].c_str());
+            block->switchLights[i][0] = csound->GetControlChannel(switchLights[i*3].c_str());
+            block->switchLights[i][1] = csound->GetControlChannel(switchLights[i*3+1].c_str());
+            block->switchLights[i][2] = csound->GetControlChannel(switchLights[i*3+2].c_str());            
+        }
+    }
+
 	int process() override {
 		ProcessBlock* block = getProcessBlock();
         // return samples to prototype
-        if(csound)
+        if(csound && compileError==0)
 			perfError = csound->PerformKsmps();
+        else
+        {
+            return 0;
+        }
         
+
         if(perfError == 0)
         {
             for (int kIndex = 0; kIndex < ksmps; kIndex++) 
@@ -122,8 +148,9 @@ struct CsoundEngine : ScriptEngine {
                 csound->SetControlChannel(knobs[i].c_str(), block->knobs[i]);
                 csound->SetControlChannel(switches[i].c_str(), block->switches[i]);
             }
-        }
 
+            updateLights(block);
+        }
 		return 0;
 	}
 
