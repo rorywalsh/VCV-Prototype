@@ -251,10 +251,22 @@ endif
 # Csound
 ifeq ($(CSOUND), 1)
 SOURCES += src/CsoundEngine.cpp
-CXXFLAGS += -I /Library/Frameworks/CsoundLib64.framework/Versions/6.0/Headers 
-LDFLAGS +=   -F /Library/Frameworks/ -framework CsoundLib64 -rpath
-# FLAGS += -lsndfile 
+ifdef ARCH_MAC
+	CXXFLAGS += -I /Library/Frameworks/CsoundLib64.framework/Versions/6.0/Headers 
+	LDFLAGS +=   -F /Library/Frameworks/ -framework CsoundLib64 -rpath
 endif
+ifdef ARCH_WIN
+	CSOUND_INCLUDE ?= "c:\PROGRA~1\Csound6_x64\include\csound"
+	CSOUND_LIBRARY ?= "c:\PROGRA~1\Csound6_x64\lib\csound64.lib"
+	CXXFLAGS += -I $(CSOUND_INCLUDE)
+	LDFLAGS += $(CSOUND_LIBRARY)
+endif
+ifdef ARCH_LIN
+	CXXFLAGS += -I /usr/local/include/csound
+	LDFLAGS += -L /usr/loca/lib -lcsound64
+endif
+endif
+
 
 
 include $(RACK_DIR)/plugin.mk
