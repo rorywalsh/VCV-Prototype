@@ -260,6 +260,7 @@ ifdef ARCH_WIN
 	CSOUND_LIBRARY ?= "c:\PROGRA~1\Csound6_x64\lib\csound64.lib"
 	CXXFLAGS += -I $(CSOUND_INCLUDE)
 	LDFLAGS += $(CSOUND_LIBRARY)
+	LDFLAGS += -Wl,--export-all-symbols
 endif
 ifdef ARCH_LIN
 	CXXFLAGS += -I /usr/local/include/csound
